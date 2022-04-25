@@ -1,0 +1,6 @@
+github.com/chipaca/width v0.0.0-20220425093736-1452e9bdab6b h1:FQr4pmsQO4/F0ROiFymG6yS3hZZgZ0aAgWsmMzrX008=
+github.com/chipaca/width v0.0.0-20220425093736-1452e9bdab6b/go.mod h1:4mJ4Vrvo9xj32FttTk5Q/aaU5qW+EuHcAUHJAuyv2o4=
+github.com/mattn/go-runewidth v0.0.13 h1:lTGmDsbAYt5DmK6OnoV7EuIF1wEIFAcxld6ypU4OSgU=
+github.com/mattn/go-runewidth v0.0.13/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
+github.com/rivo/uniseg v0.2.0 h1:S1pD9weZBuJdFmowNwbpi7BJ8TNftyUImj/0WQi72jY=
+github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
