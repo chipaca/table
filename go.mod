@@ -3,6 +3,7 @@ module github.com/chipaca/table
 go 1.17
 
 require (
+	github.com/chipaca/escapes v0.0.0-20220425095215-f1a40d753ab6
 	github.com/chipaca/width v0.0.0-20220425093736-1452e9bdab6b
 	github.com/mattn/go-runewidth v0.0.13
 )

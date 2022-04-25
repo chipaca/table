@@ -1,3 +1,5 @@
+github.com/chipaca/escapes v0.0.0-20220425095215-f1a40d753ab6 h1:r3Eqpnk3hrkSWMuKpXW3Hxy94+fxHvGLWfGFUYqvQzE=
+github.com/chipaca/escapes v0.0.0-20220425095215-f1a40d753ab6/go.mod h1:sb4b55uVWUGRPjSO9Hfq2E5kutB6mlXRetlk7Hdwm/A=
 github.com/chipaca/width v0.0.0-20220425093736-1452e9bdab6b h1:FQr4pmsQO4/F0ROiFymG6yS3hZZgZ0aAgWsmMzrX008=
 github.com/chipaca/width v0.0.0-20220425093736-1452e9bdab6b/go.mod h1:4mJ4Vrvo9xj32FttTk5Q/aaU5qW+EuHcAUHJAuyv2o4=
 github.com/mattn/go-runewidth v0.0.13 h1:lTGmDsbAYt5DmK6OnoV7EuIF1wEIFAcxld6ypU4OSgU=

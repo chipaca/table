@@ -79,7 +79,7 @@ func stringAndWidth(a interface{}) (string, int) {
 	}
 }
 
-// New initializes a table with reasonable defaults for the given headers.
+// New initializes a Table with reasonable defaults for the given headers.
 //
 // The headers can be a string, or a StringAndWidther; anything else will panic.
 func New(headers ...interface{}) *Table {
@@ -98,6 +98,34 @@ func New(headers ...interface{}) *Table {
 		maxw:      maxw,
 		Align:     align,
 		TermWidth: 80,
+	}
+}
+
+// NewGHFMD initializes a Table with reasonable defaults for the given headers
+// to produce a table formatted for GitHub-flavoured markdown.
+func NewGHFMD(headers ...string) *Table {
+	maxw := make([]int, len(headers))
+	headerW := make([]int, len(headers))
+	align := make([]ColumnAlign, len(headers))
+	for i := range headers {
+		headerW[i] = runewidth.StringWidth(headers[i])
+		maxw[i] = headerW[i]
+		align[i] = ColumnAlignLeft
+	}
+	return &Table{
+		headers:   headers,
+		headerW:   headerW,
+		maxw:      maxw,
+		Align:     align,
+		TermWidth: 80,
+		Rule: &Rule{
+			Rule:                 '-',
+			RightAlignedLeftPad:  '-',
+			RightAlignedRightPad: ':',
+			LeftAlignedLeftPad:   '-',
+			LeftAlignedRightPad:  '-',
+		},
+		Gutter: "|",
 	}
 }
 
