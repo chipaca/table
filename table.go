@@ -297,3 +297,9 @@ func (t *Table) Print(out io.Writer) {
 		fmt.Fprintf(out, rowTemplate, row...)
 	}
 }
+
+func (t *Table) String() string {
+	var b strings.Builder
+	t.Print(&b)
+	return b.String()
+}
