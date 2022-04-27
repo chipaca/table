@@ -87,6 +87,10 @@ type Table struct {
 	BeginRow func(out io.Writer)
 	// EndRow is called after printing each row (before printing the newline)
 	EndRow func(out io.Writer)
+	// Space is the rune used to fill a cell to a uniform width. Must have width 1.
+	Space rune
+	// Pad is the rune used as padding around cells. Must be width 1.
+	Pad rune
 
 	maxw    []int
 	headers []string
@@ -129,6 +133,8 @@ func New(headers ...interface{}) *Table {
 		TermWidth: 80,
 		BeginRow:  nopLiner,
 		EndRow:    nopLiner,
+		Space:     ' ',
+		Pad:       ' ',
 	}
 }
 
@@ -151,14 +157,13 @@ func NewGHFMD(headers ...string) *Table {
 		TermWidth: 200,
 		Rule: Rule{
 			Rule:                 '-',
-			RightAlignedLeftPad:  '-',
 			RightAlignedRightPad: ':',
-			LeftAlignedLeftPad:   '-',
-			LeftAlignedRightPad:  '-',
 		},
 		Gutter:   "|",
 		BeginRow: nopLiner,
 		EndRow:   nopLiner,
+		Space:    '\u00a0',
+		Pad:      '\u00a0',
 	}
 }
 
@@ -254,8 +259,8 @@ func (t *Table) Print(out io.Writer) {
 	}
 	row := make([]interface{}, 4*len(t.maxw)-1)
 	for j := 0; j <= last; j++ {
-		space := strings.Repeat("\u00a0", t.maxw[j]-t.headerW[j])
-		row[4*j] = ' '
+		space := strings.Repeat(string(t.Space), t.maxw[j]-t.headerW[j])
+		row[4*j] = t.Pad
 		switch t.Align[j] {
 		case ColumnAlignRight:
 			row[4*j+1] = space + t.headers[j]
@@ -264,7 +269,7 @@ func (t *Table) Print(out io.Writer) {
 		default:
 			panic("only left- and right-align implemented yet")
 		}
-		row[4*j+2] = ' '
+		row[4*j+2] = t.Pad
 		if j != last {
 			row[4*j+3] = t.Gutter
 		}
@@ -288,8 +293,8 @@ func (t *Table) Print(out io.Writer) {
 		}
 		t.printLine(out, rowTemplate, row)
 		for j := 0; j <= last; j++ {
-			row[4*j] = ' '
-			row[4*j+2] = ' '
+			row[4*j] = t.Pad
+			row[4*j+2] = t.Pad
 			if j != last {
 				row[4*j+3] = t.Gutter
 			}
@@ -298,7 +303,7 @@ func (t *Table) Print(out io.Writer) {
 
 	for i := range t.data {
 		for j := 0; j <= last; j++ {
-			space := strings.Repeat(" ", t.maxw[j]-t.widths[i][j])
+			space := strings.Repeat(string(t.Space), t.maxw[j]-t.widths[i][j])
 			switch t.Align[j] {
 			case ColumnAlignRight:
 				row[4*j+1] = space + t.data[i][j]
@@ -309,7 +314,7 @@ func (t *Table) Print(out io.Writer) {
 		if overflow[i] {
 			row[4*last+2] = '…'
 		} else {
-			row[4*last+2] = ' '
+			row[4*last+2] = t.Pad
 		}
 		t.printLine(out, rowTemplate, row)
 	}
