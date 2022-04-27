@@ -22,7 +22,7 @@ const (
 	// cell, like for whole numbers.
 	ColumnAlignRight = ColumnAlign(-1)
 	// ColumnAlignCenter would align things in the middle of a
-	// cell. Not currently implemented.
+	// cell.
 	ColumnAlignCenter = ColumnAlign(0)
 	// ColumnAlignLeft is the default.
 	ColumnAlignLeft = ColumnAlign(1)
@@ -38,10 +38,12 @@ type Rule struct {
 	// Rule is the rule itself; if not set, no horizontal rule is drawn
 	Rule rune
 	// if not set these fall back to Rule
-	RightAlignedLeftPad  rune
-	RightAlignedRightPad rune
-	LeftAlignedLeftPad   rune
-	LeftAlignedRightPad  rune
+	RightAlignedLeftPad   rune
+	RightAlignedRightPad  rune
+	LeftAlignedLeftPad    rune
+	LeftAlignedRightPad   rune
+	CenterAlignedLeftPad  rune
+	CenterAlignedRightPad rune
 }
 
 func (r *Rule) isSet() bool {
@@ -61,6 +63,12 @@ func (r *Rule) setDefaults() {
 	}
 	if r.LeftAlignedRightPad == 0 {
 		r.LeftAlignedRightPad = r.Rule
+	}
+	if r.CenterAlignedLeftPad == 0 {
+		r.CenterAlignedLeftPad = r.Rule
+	}
+	if r.CenterAlignedRightPad == 0 {
+		r.CenterAlignedLeftPad = r.Rule
 	}
 }
 
@@ -156,8 +164,10 @@ func NewGHFMD(headers ...string) *Table {
 		Align:     align,
 		TermWidth: 200,
 		Rule: Rule{
-			Rule:                 '-',
-			RightAlignedRightPad: ':',
+			Rule:                  '-',
+			RightAlignedRightPad:  ':',
+			CenterAlignedLeftPad:  ':',
+			CenterAlignedRightPad: ':',
 		},
 		Gutter:   "|",
 		BeginRow: nopLiner,
@@ -259,15 +269,19 @@ func (t *Table) Print(out io.Writer) {
 	}
 	row := make([]interface{}, 4*len(t.maxw)-1)
 	for j := 0; j <= last; j++ {
-		space := strings.Repeat(string(t.Space), t.maxw[j]-t.headerW[j])
+		d := t.maxw[j] - t.headerW[j]
 		row[4*j] = t.Pad
 		switch t.Align[j] {
 		case ColumnAlignRight:
-			row[4*j+1] = space + t.headers[j]
+			row[4*j+1] = strings.Repeat(string(t.Space), d) + t.headers[j]
 		case ColumnAlignLeft:
-			row[4*j+1] = t.headers[j] + space
+			row[4*j+1] = t.headers[j] + strings.Repeat(string(t.Space), d)
+		case ColumnAlignCenter:
+			dl := d / 2
+			dr := d - dl
+			row[4*j+1] = strings.Repeat(string(t.Space), dl) + t.headers[j] + strings.Repeat(string(t.Space), dr)
 		default:
-			panic("only left- and right-align implemented yet")
+			panic("only left-, center-, and right-align implemented for now")
 		}
 		row[4*j+2] = t.Pad
 		if j != last {
@@ -286,6 +300,9 @@ func (t *Table) Print(out io.Writer) {
 			case ColumnAlignLeft:
 				row[4*j] = t.Rule.LeftAlignedLeftPad
 				row[4*j+2] = t.Rule.LeftAlignedRightPad
+			case ColumnAlignCenter:
+				row[4*j] = t.Rule.CenterAlignedLeftPad
+				row[4*j+2] = t.Rule.CenterAlignedRightPad
 			}
 			if j != last && t.Rule.Gutter != "" {
 				row[4*j+3] = t.Rule.Gutter
@@ -303,12 +320,16 @@ func (t *Table) Print(out io.Writer) {
 
 	for i := range t.data {
 		for j := 0; j <= last; j++ {
-			space := strings.Repeat(string(t.Space), t.maxw[j]-t.widths[i][j])
+			d := t.maxw[j] - t.widths[i][j]
 			switch t.Align[j] {
 			case ColumnAlignRight:
-				row[4*j+1] = space + t.data[i][j]
+				row[4*j+1] = strings.Repeat(string(t.Space), d) + t.data[i][j]
 			case ColumnAlignLeft:
-				row[4*j+1] = t.data[i][j] + space
+				row[4*j+1] = t.data[i][j] + strings.Repeat(string(t.Space), d)
+			case ColumnAlignCenter:
+				dl := d / 2
+				dr := d - dl
+				row[4*j+1] = strings.Repeat(string(t.Space), dl) + t.data[i][j] + strings.Repeat(string(t.Space), dr)
 			}
 		}
 		if overflow[i] {
