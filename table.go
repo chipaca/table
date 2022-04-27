@@ -254,7 +254,7 @@ func (t *Table) Print(out io.Writer) {
 	}
 	row := make([]interface{}, 4*len(t.maxw)-1)
 	for j := 0; j <= last; j++ {
-		space := strings.Repeat(" ", t.maxw[j]-t.headerW[j])
+		space := strings.Repeat("\u00a0", t.maxw[j]-t.headerW[j])
 		row[4*j] = ' '
 		switch t.Align[j] {
 		case ColumnAlignRight:
