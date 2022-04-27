@@ -83,6 +83,10 @@ type Table struct {
 	Align []ColumnAlign
 	// TermWidth is the width of the terminal
 	TermWidth int
+	// BeginRow, is called before printing each row
+	BeginRow func(out io.Writer)
+	// EndRow is called after printing each row (before printing the newline)
+	EndRow func(out io.Writer)
 
 	maxw    []int
 	headers []string
@@ -101,6 +105,8 @@ func stringAndWidth(a interface{}) (string, int) {
 		panic(fmt.Sprintf("can't determine width from %T", b))
 	}
 }
+
+func nopLiner(io.Writer) {}
 
 // New initializes a Table with reasonable defaults for the given headers.
 //
@@ -121,6 +127,8 @@ func New(headers ...interface{}) *Table {
 		maxw:      maxw,
 		Align:     align,
 		TermWidth: 80,
+		BeginRow:  nopLiner,
+		EndRow:    nopLiner,
 	}
 }
 
@@ -148,7 +156,9 @@ func NewGHFMD(headers ...string) *Table {
 			LeftAlignedLeftPad:   '-',
 			LeftAlignedRightPad:  '-',
 		},
-		Gutter: "|",
+		Gutter:   "|",
+		BeginRow: nopLiner,
+		EndRow:   nopLiner,
 	}
 }
 
@@ -192,6 +202,13 @@ func (t *Table) Append(row ...interface{}) {
 	t.data = append(t.data, strrow)
 }
 
+func (t *Table) printLine(out io.Writer, tpl string, row []interface{}) {
+	t.BeginRow(out)
+	fmt.Fprintf(out, tpl, row...)
+	t.EndRow(out)
+	out.Write([]byte{'\n'})
+}
+
 // Print the table.
 //
 // It attempts to determine the terminal width, falling back to 80 columns if it
@@ -204,7 +221,7 @@ func (t *Table) Print(out io.Writer) {
 	// 2. the number of items in max (and the number of untrucated columns)
 	last := len(t.maxw) - 1
 	// each cell has a left pad char, data, right pad char. Then there's the gutter between cells.
-	rowTemplate := t.Indent + strings.Repeat("%c%s%c%s", last) + "%c%s%c" + t.Outdent + "\n"
+	rowTemplate := t.Indent + strings.Repeat("%c%s%c%s", last) + "%c%s%c" + t.Outdent
 
 	width := t.TermWidth
 	if width < 80 {
@@ -252,7 +269,7 @@ func (t *Table) Print(out io.Writer) {
 			row[4*j+3] = t.Gutter
 		}
 	}
-	fmt.Fprintf(out, rowTemplate, row...)
+	t.printLine(out, rowTemplate, row)
 	if t.Rule.isSet() {
 		t.Rule.setDefaults()
 		for j := 0; j <= last; j++ {
@@ -269,7 +286,7 @@ func (t *Table) Print(out io.Writer) {
 				row[4*j+3] = t.Rule.Gutter
 			}
 		}
-		fmt.Fprintf(out, rowTemplate, row...)
+		t.printLine(out, rowTemplate, row)
 		for j := 0; j <= last; j++ {
 			row[4*j] = ' '
 			row[4*j+2] = ' '
@@ -294,7 +311,7 @@ func (t *Table) Print(out io.Writer) {
 		} else {
 			row[4*last+2] = ' '
 		}
-		fmt.Fprintf(out, rowTemplate, row...)
+		t.printLine(out, rowTemplate, row)
 	}
 }
 
