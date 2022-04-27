@@ -35,11 +35,33 @@ type Rule struct {
 	// If not set, falls back to the table gutter.
 	Gutter string
 	// all these runes should have width 1
-	Rule                 rune
+	// Rule is the rule itself; if not set, no horizontal rule is drawn
+	Rule rune
+	// if not set these fall back to Rule
 	RightAlignedLeftPad  rune
 	RightAlignedRightPad rune
 	LeftAlignedLeftPad   rune
 	LeftAlignedRightPad  rune
+}
+
+func (r *Rule) isSet() bool {
+	return r.Rule != 0
+}
+
+// setDefaults defaults all the pads to the rule
+func (r *Rule) setDefaults() {
+	if r.RightAlignedLeftPad == 0 {
+		r.RightAlignedLeftPad = r.Rule
+	}
+	if r.RightAlignedRightPad == 0 {
+		r.RightAlignedRightPad = r.Rule
+	}
+	if r.LeftAlignedLeftPad == 0 {
+		r.LeftAlignedLeftPad = r.Rule
+	}
+	if r.LeftAlignedRightPad == 0 {
+		r.LeftAlignedRightPad = r.Rule
+	}
 }
 
 // A Table is a way to print tabular data to the terminal, where each column of
@@ -54,8 +76,9 @@ type Table struct {
 	Indent string
 	// Outdent is added to the end of every line
 	Outdent string
-	// Rule can be set to non-nil for drawing a line between headers and data
-	Rule *Rule
+	// Rule can be set for drawing a line between headers and data
+	// (see details in Rule itself)
+	Rule Rule
 	// Alignment of each column (including headers)
 	Align []ColumnAlign
 	// TermWidth is the width of the terminal
@@ -117,8 +140,8 @@ func NewGHFMD(headers ...string) *Table {
 		headerW:   headerW,
 		maxw:      maxw,
 		Align:     align,
-		TermWidth: 80,
-		Rule: &Rule{
+		TermWidth: 200,
+		Rule: Rule{
 			Rule:                 '-',
 			RightAlignedLeftPad:  '-',
 			RightAlignedRightPad: ':',
@@ -230,7 +253,8 @@ func (t *Table) Print(out io.Writer) {
 		}
 	}
 	fmt.Fprintf(out, rowTemplate, row...)
-	if t.Rule != nil {
+	if t.Rule.isSet() {
+		t.Rule.setDefaults()
 		for j := 0; j <= last; j++ {
 			row[4*j+1] = strings.Repeat(string(t.Rule.Rule), t.maxw[j])
 			switch t.Align[j] {
