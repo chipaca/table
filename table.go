@@ -68,7 +68,7 @@ func (r *Rule) setDefaults() {
 		r.CenterAlignedLeftPad = r.Rule
 	}
 	if r.CenterAlignedRightPad == 0 {
-		r.CenterAlignedLeftPad = r.Rule
+		r.CenterAlignedRightPad = r.Rule
 	}
 }
 
